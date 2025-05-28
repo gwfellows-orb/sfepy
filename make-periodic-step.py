@@ -4,20 +4,16 @@ import numpy as np
 
 gmsh.initialize()
 gmsh.model.add("pve")
-
-# STEP file path
 gmsh.merge("test_model.step")
 
-# Classify geometry and synchronize
-gmsh.model.geo.synchronize()
-gmsh.model.mesh.classifySurfaces(angle=40 * np.pi / 180)
-gmsh.model.mesh.createGeometry()
-gmsh.model.geo.synchronize()
+gmsh.model.occ.synchronize()
+
+# Get bounding box
+xmin, ymin, zmin, xmax, ymax, zmax = gmsh.model.getBoundingBox(3, 1)
 
 
-# Find planar surfaces at min/max x/y/z
+# Helper: get surfaces near a coordinate plane
 def get_surfaces_by_com(axis: int, target: float, tol=1e-5):
-    """Find surfaces with center of mass on target plane (axis 0=x,1=y,2=z)"""
     matching = []
     for dim, tag in gmsh.model.getEntities(2):
         com = gmsh.model.occ.getCenterOfMass(dim, tag)
@@ -26,56 +22,76 @@ def get_surfaces_by_com(axis: int, target: float, tol=1e-5):
     return matching
 
 
-# Get bounding box
-xmin, ymin, zmin, xmax, ymax, zmax = gmsh.model.getBoundingBox(3, 1)
-
-# Get opposite surfaces
+# Find surfaces on opposing faces
 x0_surfs = get_surfaces_by_com(0, xmin)
 x1_surfs = get_surfaces_by_com(0, xmax)
-
 y0_surfs = get_surfaces_by_com(1, ymin)
 y1_surfs = get_surfaces_by_com(1, ymax)
-
 z0_surfs = get_surfaces_by_com(2, zmin)
 z1_surfs = get_surfaces_by_com(2, zmax)
 
+gmsh.model.occ.synchronize()
 
-# Define periodic boundary pairs with identity mapping (assumes matching geometry)
-def set_periodic(slave_tags, master_tags, translation_vector):
+
+# Surface matching utility: match surfaces by bounding box centroid distance
+def match_surface_pairs(surfs_a, surfs_b):
+    def center(tag):
+        return gmsh.model.occ.getCenterOfMass(2, tag)
+
+    pairs = []
+    used = set()
+    for a in surfs_a:
+        ca = np.array(center(a))
+        best = None
+        best_dist = 1e9
+        for b in surfs_b:
+            if b in used:
+                continue
+            cb = np.array(center(b))
+            dist = np.linalg.norm(ca - cb)
+            if dist < best_dist:
+                best = b
+                best_dist = dist
+        if best is not None:
+            pairs.append((a, best))
+            used.add(best)
+    return pairs
+
+
+def set_periodic_pairs(pairs, translation):
     affine = [
         1,
         0,
         0,
-        translation_vector[0],
+        translation[0],
         0,
         1,
         0,
-        translation_vector[1],
+        translation[1],
         0,
         0,
         1,
-        translation_vector[2],
+        translation[2],
+        0,
+        0,
+        0,
+        1,
     ]
-    gmsh.model.mesh.setPeriodic(2, slave_tags, master_tags, affine)
+    for slave, master in pairs:
+        gmsh.model.mesh.setPeriodic(2, [slave], [master], affine)
 
 
-set_periodic(x1_surfs, x0_surfs, [xmax - xmin, 0, 0])
-set_periodic(y1_surfs, y0_surfs, [0, ymax - ymin, 0])
-set_periodic(z1_surfs, z0_surfs, [0, 0, zmax - zmin])
+# Apply periodicity for each axis
+set_periodic_pairs(match_surface_pairs(x1_surfs, x0_surfs), [xmax - xmin, 0, 0])
+set_periodic_pairs(match_surface_pairs(y1_surfs, y0_surfs), [0, ymax - ymin, 0])
+set_periodic_pairs(match_surface_pairs(z1_surfs, z0_surfs), [0, 0, zmax - zmin])
 
-# Optionally tag volume as physical
-vols = gmsh.model.getEntities(3)
-if vols:
-    gmsh.model.addPhysicalGroup(3, [v[1] for v in vols], tag=1)
-
-# Set msh version for SfePy compatibility
+# Finalize mesh and export
+gmsh.model.occ.synchronize()
 gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)
-
-# Generate mesh and write
 gmsh.model.mesh.generate(3)
 gmsh.write("t18.msh")
 
-# Launch GUI unless -nopopup
 if "-nopopup" not in sys.argv:
     gmsh.fltk.run()
 

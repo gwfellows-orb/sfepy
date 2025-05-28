@@ -1,3 +1,6 @@
+# this one imports a cube and outputs its properties..
+
+
 r"""
 Compute homogenized elastic coefficients for a given heterogeneous linear
 elastic microstructure.

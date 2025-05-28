@@ -15,6 +15,15 @@ import sys
 
 gmsh.initialize()
 
+"""
+gmsh.model.add(name)
+
+Add a new model, with name `name', and set it as the current model.
+
+Types:
+- `name': string
+"""
+
 gmsh.model.add("t18")
 
 # Let's use the OpenCASCADE geometry kernel to build two geometries.
@@ -23,9 +32,77 @@ gmsh.model.add("t18")
 # constraint (set on purpose to be able to verify visually that the periodicity
 # constraint works!):
 
+"""
+gmsh.model.occ.addBox(x, y, z, dx, dy, dz, tag=-1)
+
+Add a parallelepipedic box in the OpenCASCADE CAD representation, defined
+by a point (`x', `y', `z') and the extents along the x-, y- and z-axes. If
+`tag' is positive, set the tag explicitly; otherwise a new tag is selected
+automatically. Return the tag of the box.
+
+Return an integer.
+
+Types:
+- `x': double
+- `y': double
+- `z': double
+- `dx': double
+- `dy': double
+- `dz': double
+- `tag': integer
+"""
+
 gmsh.model.occ.addBox(0, 0, 0, 1, 1, 1, 1)
+"""
 gmsh.model.occ.synchronize()
 
+Synchronize the OpenCASCADE CAD representation with the current Gmsh model.
+This can be called at any time, but since it involves a non trivial amount
+of processing, the number of synchronization points should normally be
+minimized. Without synchronization the entities in the OpenCASCADE CAD
+representation are not available to any function outside of the OpenCASCADE
+CAD kernel functions.
+"""
+
+gmsh.model.occ.synchronize()
+"""
+gmsh.model.occ.mesh.setSize(dimTags, size)
+
+Set a mesh size constraint on the entities `dimTags' (given as a vector of
+(dim, tag) pairs) in the OpenCASCADE CAD representation. Currently only
+entities of dimension 0 (points) are handled.
+
+Types:
+- `dimTags': vector of pairs of integers
+- `size': double
+"""
+
+"""
+gmsh.model.occ.mesh.setSize(dimTags, size)
+
+Set a mesh size constraint on the entities `dimTags' (given as a vector of
+(dim, tag) pairs) in the OpenCASCADE CAD representation. Currently only
+entities of dimension 0 (points) are handled.
+
+Types:
+- `dimTags': vector of pairs of integers
+- `size': double
+"""
+"""
+gmsh.model.getEntities(dim=-1)
+
+Get all the entities in the current model. A model entity is represented by
+two integers: its dimension (dim == 0, 1, 2 or 3) and its tag (its unique,
+strictly positive identifier). If `dim' is >= 0, return only the entities
+of the specified dimension (e.g. points if `dim' == 0). The entities are
+returned as a vector of (dim, tag) pairs.
+
+Return `dimTags'.
+
+Types:
+- `dimTags': vector of pairs of integers
+- `dim': i
+"""
 gmsh.model.mesh.setSize(gmsh.model.getEntities(0), 0.1)
 gmsh.model.mesh.setSize([(0, 1)], 0.02)
 
@@ -33,6 +110,27 @@ gmsh.model.mesh.setSize([(0, 1)], 0.02)
 # match the mesh from surface 1 (the left side), the following periodicity
 # constraint is set:
 translation = [1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+
+"""
+gmsh.model.mesh.setPeriodic(dim, tags, tagsMaster, affineTransform)
+
+Set the meshes of the entities of dimension `dim' and tag `tags' as
+periodic copies of the meshes of entities `tagsMaster', using the affine
+transformation specified in `affineTransformation' (16 entries of a 4x4
+matrix, by row). If used after meshing, generate the periodic node
+correspondence information assuming the meshes of entities `tags'
+effectively match the meshes of entities `tagsMaster' (useful for
+structured and extruded meshes). Currently only available for @code{dim} ==
+1 and @code{dim} == 2.
+
+Types:
+- `dim': integer
+- `tags': vector of integers
+- `tagsMaster': vector of integers
+- `affineTransform': vector of doubles
+"""
+
+
 gmsh.model.mesh.setPeriodic(2, [2], [1], translation)
 
 # The periodicity transform is provided as a 4x4 affine transformation matrix,
@@ -131,6 +229,15 @@ for i in sxmin:
         ):
             gmsh.model.mesh.setPeriodic(2, [j[1]], [i[1]], translation)
 """
+"""
+gmsh.model.mesh.generate(dim=3)
+
+Generate a mesh of the current model, up to dimension `dim' (0, 1, 2 or 3).
+
+Types:
+- `dim': integer
+"""
+
 gmsh.model.mesh.generate(3)
 gmsh.write("t18.msh")
 
