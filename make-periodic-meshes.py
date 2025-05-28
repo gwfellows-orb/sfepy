@@ -48,7 +48,7 @@ gmsh.model.mesh.setPeriodic(
 gmsh.model.mesh.setPeriodic(
     2, [4], [3], [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
 )
-
+"""
 # For more complicated cases, finding the corresponding surfaces by hand can
 # be tedious, especially when geometries are created through solid
 # modelling. Let's construct a slightly more complicated geometry.
@@ -130,7 +130,7 @@ for i in sxmin:
             and abs(zmax2 - zmax) < eps
         ):
             gmsh.model.mesh.setPeriodic(2, [j[1]], [i[1]], translation)
-
+"""
 gmsh.model.mesh.generate(3)
 gmsh.write("t18.msh")
 
