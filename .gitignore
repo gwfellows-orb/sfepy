@@ -14,3 +14,4 @@ sfepy/discrete/__config__.py
 site_cfg.py
 work/
 /_skbuild/
+/CGAL-5.3.1

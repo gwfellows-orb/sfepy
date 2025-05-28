@@ -55,24 +55,29 @@ def recovery_le(pb, corrs, macro):
     return out
 
 
-filename_mesh = data_dir + "/meshes/3d/matrix_fiber.mesh"
+filename_mesh = data_dir + "/meshes/3d/from-step-RVE-test.vtk"
 dim = 3
-region_lbn = (0, 0, 0)
-region_rtf = (1, 1, 1)
+region_lbn = (-0.5, -0.5, 0)
+region_rtf = (0.5, 0.5, 0.2)
 
 regions = {
     "Y": "all",
-    "Ym": "cells of group 1",
-    "Yc": "cells of group 2",
+    # "Ym": "cells of group 0",
+    # "Yc": "cells of group 2",
 }
+print("line 68")
+print(regions)
+print("line 70")
 regions.update(define_box_regions(dim, region_lbn, region_rtf))
+print(regions)
+print("line 73")
 
 materials = {
     "mat": (
         {
             "D": {
-                "Ym": stiffness_from_youngpoisson(dim, 7.0e9, 0.4),
-                "Yc": stiffness_from_youngpoisson(dim, 70.0e9, 0.2),
+                "Y": stiffness_from_youngpoisson(dim, 7.0e9, 0.4),
+                # "Yc": stiffness_from_youngpoisson(dim, 70.0e9, 0.2),
             }
         },
     ),
