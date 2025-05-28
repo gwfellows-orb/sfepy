@@ -76,7 +76,9 @@ materials = {
     "mat": (
         {
             "D": {
-                "Y": stiffness_from_youngpoisson(dim, 7.0e9, 0.4),
+                "Y": stiffness_from_youngpoisson(
+                    dim, 210000, 0.3
+                )  # values for steel in mPa # stiffness_from_youngpoisson(dim, 7.0e9, 0.4),
                 # "Yc": stiffness_from_youngpoisson(dim, 70.0e9, 0.2),
             }
         },
