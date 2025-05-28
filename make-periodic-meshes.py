@@ -5,7 +5,7 @@
 #  Periodic meshes
 #
 # ------------------------------------------------------------------------------
-
+# right now this one makes a cube that can be infinetly tiled (periodic coresponce tween paralell sides)
 # Periodic meshing constraints can be imposed on surfaces and curves.
 
 import gmsh

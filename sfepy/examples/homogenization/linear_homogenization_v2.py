@@ -1,5 +1,5 @@
 # this one imports a cube and outputs its properties..
-v2
+
 
 r"""
 Compute homogenized elastic coefficients for a given heterogeneous linear
