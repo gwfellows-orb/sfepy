@@ -58,10 +58,12 @@ def recovery_le(pb, corrs, macro):
     return out
 
 
-filename_mesh = data_dir + "/t18.msh"  # "/meshes/3d/from-step-RVE-test.vtk"
+filename_mesh = (
+    data_dir + "/t18.vtk"  # "/meshes/3d/periodic_RVE.vtk"
+)  # "/meshes/3d/from-step-RVE-test.vtk"
 dim = 3
-region_lbn = (0, 0, 0)  # (-0.5, -0.5, 0)
-region_rtf = (1, 1, 1)  # (0.5, 0.5, 0.2)
+region_lbn = (-0.5, -0.5, 0)
+region_rtf = (0.5, 0.5, 0.2)
 
 regions = {
     "Y": "all",
