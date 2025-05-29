@@ -91,17 +91,17 @@ gmsh.option.setNumber("Geometry.OCCBoundsUseStl", 1)
 
 eps = 1e-2
 
-# --------------
-p = gmsh.model.getEntitiesInBoundingBox(
-    -0.5 - eps,
-    -0.5 - eps + 0.25,
-    0 - eps,
-    0.1 + 2 * eps,
-    0.4 + 2 * eps,
-    0.2 + 2 * eps,
-    0,
-)
-gmsh.model.mesh.setSize(p, 0.05)
+# -------------- this is a test
+# p = gmsh.model.getEntitiesInBoundingBox(
+#     -0.5 - eps,
+#     -0.5 - eps + 0.25,
+#     0 - eps,
+#     0.1 + 2 * eps,
+#     1 + 2 * eps,
+#     0.2 + 2 * eps,
+#     0,
+# )
+# gmsh.model.mesh.setSize(p, 0.05)
 # -------------
 
 region_lbn = (-0.5, -0.5, 0)
@@ -162,9 +162,80 @@ for i in sxmin:
             and abs(zmax2 - zmax) < eps
         ):
             gmsh.model.mesh.setPeriodic(2, [j[1]], [i[1]], translation_matrix(1, 0, 0))
-            print("adding periodic constraint...")
+            print("adding X periodic constraint...")
+# ----------
 
+for i in sxmin:
+    # Then we get the bounding box of each ___ surface
+    xmin, ymin, zmin, xmax, ymax, zmax = gmsh.model.getBoundingBox(i[0], i[1])
+    # We translate the bounding box to the front and look for surfaces inside
+    # it:
+    gmsh.model.occ.synchronize()
+    symax = gmsh.model.getEntitiesInBoundingBox(
+        xmin - eps,
+        ymin - eps + 1,
+        zmin - eps,
+        xmax + eps,
+        ymax + eps + 1,
+        zmax + eps,
+        2,
+    )
+    print("syxax = ", symax)
 
+    # For all the matches, we compare the corresponding bounding boxes...
+    for j in symax:
+        xmin2, ymin2, zmin2, xmax2, ymax2, zmax2 = gmsh.model.getBoundingBox(j[0], j[1])
+        ymin2 -= 1
+        ymax2 -= 1
+        # ...and if they match, we apply the periodicity constraint
+        if (
+            abs(xmin2 - xmin) < eps
+            and abs(xmax2 - xmax) < eps
+            and abs(ymin2 - ymin) < eps
+            and abs(ymax2 - ymax) < eps
+            and abs(zmin2 - zmin) < eps
+            and abs(zmax2 - zmax) < eps
+        ):
+            gmsh.model.mesh.setPeriodic(2, [j[1]], [i[1]], translation_matrix(0, 1, 0))
+            print("adding Y periodic constraint...")
+# -------
+
+for i in sxmin:
+    # Then we get the bounding box of each ___ surface
+    xmin, ymin, zmin, xmax, ymax, zmax = gmsh.model.getBoundingBox(i[0], i[1])
+    # We translate the bounding box to the top and look for surfaces inside
+    # it:
+    gmsh.model.occ.synchronize()
+    symax = gmsh.model.getEntitiesInBoundingBox(
+        xmin - eps,
+        ymin - eps,
+        zmin - eps + 0.2,  # CHANGE TO VAR...
+        xmax + eps,
+        ymax + eps,
+        zmax + eps + 0.2,  # CHANGE TO VAR...
+        2,
+    )
+    print("syxax = ", symax)
+
+    # For all the matches, we compare the corresponding bounding boxes...
+    for j in symax:
+        xmin2, ymin2, zmin2, xmax2, ymax2, zmax2 = gmsh.model.getBoundingBox(j[0], j[1])
+        zmin2 -= 0.2  # CHANGE TO VAR...
+        zmax2 -= 0.2  # CHANGE TO VAR...
+        # ...and if they match, we apply the periodicity constraint
+        if (
+            abs(xmin2 - xmin) < eps
+            and abs(xmax2 - xmax) < eps
+            and abs(ymin2 - ymin) < eps
+            and abs(ymax2 - ymax) < eps
+            and abs(zmin2 - zmin) < eps
+            and abs(zmax2 - zmax) < eps
+        ):
+            gmsh.model.mesh.setPeriodic(
+                2, [j[1]], [i[1]], translation_matrix(0, 0, 0.2)  # VARIBALE.........
+            )
+            print("adding Z periodic constraint...")
+# -------
 """
 gmsh.model.mesh.generate(dim=3)
 
