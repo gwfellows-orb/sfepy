@@ -159,7 +159,6 @@ gmsh.model.mesh.setPeriodic(
 gmsh.model.mesh.setPeriodic(
     2, [4], [3], [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
 )
-"""
 # For more complicated cases, finding the corresponding surfaces by hand can
 # be tedious, especially when geometries are created through solid
 # modelling. Let's construct a slightly more complicated geometry.
@@ -211,6 +210,7 @@ gmsh.model.mesh.setSize(p, 0.001)
 sxmin = gmsh.model.getEntitiesInBoundingBox(
     2 - eps, -eps, -eps, 2 + eps, 1 + eps, 1 + eps, 2
 )
+print("SXMAIN = ", sxmin)
 
 for i in sxmin:
     # Then we get the bounding box of each left surface
@@ -226,6 +226,7 @@ for i in sxmin:
         zmax + eps,
         2,
     )
+    print("SXMAX=", sxmax)
     # For all the matches, we compare the corresponding bounding boxes...
     for j in sxmax:
         xmin2, ymin2, zmin2, xmax2, ymax2, zmax2 = gmsh.model.getBoundingBox(j[0], j[1])
@@ -241,7 +242,8 @@ for i in sxmin:
             and abs(zmax2 - zmax) < eps
         ):
             gmsh.model.mesh.setPeriodic(2, [j[1]], [i[1]], translation)
-"""
+            print("added constraint")
+
 """
 gmsh.model.mesh.generate(dim=3)
 

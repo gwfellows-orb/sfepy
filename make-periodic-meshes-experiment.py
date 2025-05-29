@@ -91,12 +91,25 @@ gmsh.option.setNumber("Geometry.OCCBoundsUseStl", 1)
 
 eps = 1e-2
 
+# --------------
+p = gmsh.model.getEntitiesInBoundingBox(
+    -0.5 - eps,
+    -0.5 - eps + 0.25,
+    0 - eps,
+    0.1 + 2 * eps,
+    0.4 + 2 * eps,
+    0.2 + 2 * eps,
+    0,
+)
+gmsh.model.mesh.setSize(p, 0.05)
+# -------------
+
 region_lbn = (-0.5, -0.5, 0)
 region_rtf = (0.5, 0.5, 0.2)
 
 # First we get all surfaces on the left:
 sxmin = gmsh.model.getEntitiesInBoundingBox(
-    -0.5 - eps, -0.5 - eps, 0 - eps, 2 * eps, 1 + 2 * eps, 0.2 + 2 * eps, 2
+    -0.5 - eps, -0.5 - eps, 0 - eps, 1 + 2 * eps, 1 + 2 * eps, 0.2 + 2 * eps, 2
 )
 print("sxmin: ", sxmin)
 
@@ -124,23 +137,15 @@ for i in sxmin:
     # it:
     gmsh.model.occ.synchronize()
     sxmax = gmsh.model.getEntitiesInBoundingBox(
-        0.5 - eps, -0.5 - eps, 0 - eps, 2 * eps, 1 + 2 * eps, 0.2 + 2 * eps, 2
+        xmin - eps + 1,
+        ymin - eps,
+        zmin - eps,
+        xmax + eps + 1,
+        ymax + eps,
+        zmax + eps,
+        2,
     )
-    print("sxmax: ", sxmax)
-    gmsh.model.occ.addBox(
-        0.5 - eps, -0.5 - eps, 0 - eps, 2 * eps, 1 + 2 * eps, 0.2 + 2 * eps, 2
-    )
-
-    gmsh.model.occ.synchronize()
-
-    gmsh.model.mesh.generate(3)
-    gmsh.write("t18.vtk")
-
-    # Launch the GUI to see the results:
-    if "-nopopup" not in sys.argv:
-        gmsh.fltk.run()
-
-    gmsh.finalize()
+    print("smxax = ", sxmax)
 
     # For all the matches, we compare the corresponding bounding boxes...
     for j in sxmax:
@@ -168,7 +173,24 @@ Generate a mesh of the current model, up to dimension `dim' (0, 1, 2 or 3).
 Types:
 - `dim': integer
 """
+# --------------
 
+# # Synchronize to register entities
+# gmsh.model.occ.synchronize()
+
+# # Get all OCC entities (dim = 3 for volumes, dim = -1 for all)
+# all_entities = gmsh.model.occ.getEntities(-1)  # use -1 for all dimensions
+
+# # Copy everything
+# copies = gmsh.model.occ.copy(all_entities)
+
+# # Translate the copies
+# gmsh.model.occ.translate(copies, dx=1, dy=0, dz=0)
+
+# gmsh.model.occ.synchronize()
+
+
+# -----------------
 gmsh.model.mesh.generate(3)
 gmsh.write("t18.vtk")
 
